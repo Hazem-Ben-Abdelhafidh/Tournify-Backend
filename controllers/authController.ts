@@ -5,12 +5,29 @@ import AppError from "../utils/appError";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt/tokens";
 import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { promisify } from "util";
+import jwt, { Jwt, JwtPayload } from "jsonwebtoken";
 export const protect = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       return next(new AppError("You need to login first", 401));
     }
+    const decoded: JwtPayload = await promisify(jwt.verify)(
+      token,
+      process.env.ACCESS_TOKEN_SECRET
+    );
+    const currentUser = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+    if (!currentUser) {
+      return next(
+        new AppError("the user belonging to this token no longer exists", 401)
+      );
+    }
+    req.user = currentUser;
+
+    next();
   }
 );
 // log User

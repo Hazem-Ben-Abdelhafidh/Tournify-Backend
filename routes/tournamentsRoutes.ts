@@ -10,9 +10,9 @@ const tournamentRouter = express.Router();
 tournamentRouter.use(protect);
 tournamentRouter
   .route("/")
-  .get(getTournament)
   .post(createTournament)
   .delete(deleteTournament)
   .patch(updateTournament);
+tournamentRouter.route("/:id").get(getTournament);
 
 export default tournamentRouter;
