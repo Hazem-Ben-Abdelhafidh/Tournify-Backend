@@ -8,9 +8,11 @@ export async function createTournament(
   res: Response,
   next: NextFunction
 ) {
+  const userId = req.user?.id;
   const tournament = await prisma.tournament.create({
     data: {
       ...req.body,
+      userId,
     },
   });
   res.json(tournament);
@@ -27,6 +29,7 @@ export const updateTournament = catchAsync(
     });
   }
 );
+
 export const deleteTournament = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const tournament = prisma.tournament.delete({
@@ -36,7 +39,14 @@ export const deleteTournament = catchAsync(
     });
   }
 );
-
+export const getTournaments = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const tournaments = prisma.tournament.findMany();
+    res.status(200).json({
+      tournaments,
+    });
+  }
+);
 export const getTournament = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const tournament = prisma.tournament.findFirst({
