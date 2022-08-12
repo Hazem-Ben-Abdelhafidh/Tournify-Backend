@@ -69,13 +69,14 @@ export const login = catchAsync(
       req.body;
     const user = await prisma.user.findFirst({
       where: {
-        email,
+        email: email,
       },
     });
     if (!user) {
       return next(new AppError("User doesn't exist "));
     }
-    if (!(await bcrypt.compare(user.password!, password!))) {
+    console.log(await bcrypt.compare(password, user.password!));
+    if (!(await bcrypt.compare(password, user.password!))) {
       return next(new AppError("Credentials are wrong!"));
     }
     logUser(res, user);

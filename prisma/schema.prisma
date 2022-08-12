@@ -11,13 +11,12 @@ datasource db {
 }
 
 model User {
-  id            String          @id @unique @default(uuid())
-  name          String          @unique
-  email         String          @unique
-  password      String?         @default("Hazem")
-  RefreshTokens RefreshTokens[]
-
-  @@unique([name, email])
+  id         String       @id @unique @default(uuid())
+  name       String       @unique
+  email      String       @unique
+  password   String?      @default("Hazem")
+  Role       Role         @default(USER)
+  Tournament Tournament[]
 }
 
 model Tournament {
@@ -25,17 +24,14 @@ model Tournament {
   name          String
   game          String
   numberOfTeams Int
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
   cost          Float
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 
-model RefreshTokens {
-  id           String   @id @unique @default(uuid())
-  refreshToken String
-  userId       String
-  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  revoked      Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+enum Role {
+  USER
+  ADMIN
 }
