@@ -7,6 +7,7 @@ import router from "./routes/userRoutes";
 import tournamentRouter from "./routes/tournamentsRoutes";
 import AppError from "./utils/appError";
 import helmet from "helmet";
+import prisma from "./utils/prisma";
 process.on("uncaughtException", (err) => {
   console.log(err.name);
   console.log(err.message);

@@ -57,7 +57,6 @@ export const signup = catchAsync(
         password,
       },
     });
-
     logUser(res, newUser);
   }
 );
@@ -75,7 +74,6 @@ export const login = catchAsync(
     if (!user) {
       return next(new AppError("User doesn't exist "));
     }
-    console.log(await bcrypt.compare(password, user.password!));
     if (!(await bcrypt.compare(password, user.password!))) {
       return next(new AppError("Credentials are wrong!"));
     }

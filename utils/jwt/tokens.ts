@@ -6,7 +6,7 @@ export const generateAccessToken = (user: User) => {
     { id: user.id },
     process.env.ACCESS_TOKEN_SECRET!,
     {
-      expiresIn: "5m",
+      expiresIn: "15m",
     }
   );
   return accessToken;
@@ -16,7 +16,7 @@ export const generateRefreshToken = (user: User) => {
     { id: user.id },
     process.env.REFRESH_TOKEN_SECRET!,
     {
-      expiresIn: "5m",
+      expiresIn: "15m",
     }
   );
   return refreshToken;
