@@ -5,6 +5,7 @@ import {
   deleteTournament,
   getTournament,
   getTournaments,
+  searchResults,
   updateTournament,
 } from "../controllers/tournamentController";
 const tournamentRouter = express.Router();
@@ -15,6 +16,7 @@ tournamentRouter
   .post(createTournament)
   .delete(deleteTournament)
   .patch(updateTournament);
+tournamentRouter.get("/search", searchResults);
 tournamentRouter.route("/:id").get(getTournament);
 
 export default tournamentRouter;

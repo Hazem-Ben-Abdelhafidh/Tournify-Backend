@@ -1,6 +1,7 @@
-import express, { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import catchAsync from "../utils/catchAsync";
+import HttpStatusCode from "../utils/constants/httpStatusCodes";
 const prisma = new PrismaClient();
 
 export async function createTournament(
@@ -12,7 +13,7 @@ export async function createTournament(
   const tournament = await prisma.tournament.create({
     data: {
       ...req.body,
-      userId,
+      ownerId: userId,
     },
   });
   res.json(tournament);
@@ -32,7 +33,7 @@ export const updateTournament = catchAsync(
 
 export const deleteTournament = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const tournament = prisma.tournament.delete({
+    const tournament = await prisma.tournament.delete({
       where: {
         id: req.params.id,
       },
@@ -41,7 +42,11 @@ export const deleteTournament = catchAsync(
 );
 export const getTournaments = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const tournaments = prisma.tournament.findMany();
+    const tournaments = await prisma.tournament.findMany({
+      include: {
+        owner: true,
+      },
+    });
     res.status(200).json({
       tournaments,
     });
@@ -49,13 +54,37 @@ export const getTournaments = catchAsync(
 );
 export const getTournament = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const tournament = prisma.tournament.findFirst({
+    const tournament = await prisma.tournament.findFirst({
       where: {
         id: req.params.id,
       },
     });
     res.status(200).json({
       tournament,
+    });
+  }
+);
+
+export const searchResults = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const searchQuery = req.query.search as string;
+    console.log(searchQuery);
+    const tournaments = await prisma.tournament.findMany({
+      where: {
+        OR: [{ game: searchQuery }, { name: searchQuery }],
+      },
+    });
+    const users = await prisma.user.findMany({
+      where: {
+        name: searchQuery,
+      },
+    });
+    res.status(HttpStatusCode.ACCEPTED).json({
+      status: "success",
+      data: {
+        users,
+        tournaments,
+      },
     });
   }
 );
