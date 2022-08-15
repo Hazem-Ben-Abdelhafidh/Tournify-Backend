@@ -46,6 +46,9 @@ export const getTournaments = catchAsync(
       include: {
         owner: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     res.status(200).json({
       tournaments,
@@ -59,7 +62,7 @@ export const getTournament = catchAsync(
         id: req.params.id,
       },
     });
-    res.status(200).json({
+    res.status(HttpStatusCode.ACCEPTED).json({
       tournament,
     });
   }
@@ -71,12 +74,15 @@ export const searchResults = catchAsync(
     console.log(searchQuery);
     const tournaments = await prisma.tournament.findMany({
       where: {
-        OR: [{ game: searchQuery }, { name: searchQuery }],
+        OR: [
+          { game: { contains: searchQuery } },
+          { name: { contains: searchQuery } },
+        ],
       },
     });
     const users = await prisma.user.findMany({
       where: {
-        name: searchQuery,
+        name: { contains: searchQuery },
       },
     });
     res.status(HttpStatusCode.ACCEPTED).json({
