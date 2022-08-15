@@ -11,12 +11,15 @@ datasource db {
 }
 
 model User {
-  id         String       @id @unique @default(uuid())
-  name       String       @unique
-  email      String       @unique
-  password   String?      @default("Hazem")
-  Role       Role         @default(USER)
-  Tournament Tournament[]
+  id                 String       @id @unique @default(uuid())
+  name               String       @unique
+  email              String       @unique
+  password           String       @default("Hazem")
+  Role               Role         @default(USER)
+  createdTournaments Tournament[] @relation("CreatedTournaments")
+  joinedTournaments  Tournament[] @relation("JoinedTournaments")
+  Tournament         Tournament?  @relation(fields: [tournamentId], references: [id])
+  tournamentId       String?
 }
 
 model Tournament {
@@ -24,9 +27,13 @@ model Tournament {
   name          String
   game          String
   numberOfTeams Int
-  userId        String
-  user          User     @relation(fields: [userId], references: [id])
+  ownerId       String
+  owner         User     @relation("CreatedTournaments", fields: [ownerId], references: [id])
   cost          Float
+  participants  User[]
+  joined        User?    @relation("JoinedTournaments", fields: [joinedById], references: [id])
+  joinedById    String?
+  startTime     DateTime @default(now())
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
