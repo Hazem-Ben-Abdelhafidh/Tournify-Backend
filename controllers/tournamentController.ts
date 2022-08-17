@@ -55,6 +55,19 @@ export const getTournaments = catchAsync(
     });
   }
 );
+export const getTournamentsById = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const tournaments = await prisma.tournament.findMany({
+      where: {
+        ownerId: req.params.id,
+      },
+    });
+    res.status(HttpStatusCode.ACCEPTED).json({
+      status: "success",
+      tournaments,
+    });
+  }
+);
 export const getTournament = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const tournament = await prisma.tournament.findUnique({
