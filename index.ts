@@ -8,12 +8,14 @@ import tournamentRouter from "./routes/tournamentsRoutes";
 import AppError from "./utils/appError";
 import helmet from "helmet";
 import prisma from "./utils/prisma";
+import { google } from "googleapis";
 process.on("uncaughtException", (err) => {
   console.log(err.name);
   console.log(err.message);
   console.log("shutting down...");
   process.exit(1);
 });
+const scopes = ["https://www.googleapis.com/auth/drive"];
 
 const app = express();
 const port = 5000;
@@ -35,6 +37,14 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(helmet());
 app.listen(port, () => {
+  const auth = new google.auth.GoogleAuth({
+    keyFile: process.env.KEY_FILE_PATH!,
+    scopes,
+  });
+  const driveService = google.drive({
+    version: "v3",
+    auth,
+  });
   console.log("Application listening on port: ", port);
 });
 
