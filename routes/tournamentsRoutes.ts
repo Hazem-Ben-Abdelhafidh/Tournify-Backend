@@ -7,6 +7,8 @@ import {
   getTournaments,
   searchResults,
   updateTournament,
+  joinTournament,
+  getParticipants,
 } from "../controllers/tournamentController";
 const tournamentRouter = express.Router();
 tournamentRouter.use(protect);
@@ -17,6 +19,8 @@ tournamentRouter
   .delete(deleteTournament)
   .patch(updateTournament);
 tournamentRouter.get("/search", searchResults);
+tournamentRouter.post("/join/:id", joinTournament);
+tournamentRouter.get("/participants/:id", getParticipants);
 tournamentRouter.route("/:id").get(getTournament);
 
 export default tournamentRouter;

@@ -94,3 +94,37 @@ export const searchResults = catchAsync(
     });
   }
 );
+
+export const joinTournament = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.id as string;
+    const tournamentId = req.params.id;
+    const tournament = await prisma.join.create({
+      data: {
+        userId,
+        tournamentId,
+      },
+    });
+    res.status(HttpStatusCode.CREATED).json({
+      status: "success",
+      tournament,
+    });
+  }
+);
+
+export const getParticipants = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const participants = await prisma.join.findMany({
+      where: {
+        tournamentId: req.params.id,
+      },
+      include: {
+        user: true,
+      },
+    });
+    res.status(HttpStatusCode.ACCEPTED).json({
+      status: "success",
+      participants,
+    });
+  }
+);
