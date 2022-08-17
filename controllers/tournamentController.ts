@@ -57,13 +57,25 @@ export const getTournaments = catchAsync(
 );
 export const getTournament = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const tournament = await prisma.tournament.findFirst({
+    const tournament = await prisma.tournament.findUnique({
       where: {
         id: req.params.id,
       },
     });
+    const owner = await prisma.user.findUnique({
+      where: {
+        id: tournament?.ownerId,
+      },
+      select: {
+        name: true,
+      },
+    });
     res.status(HttpStatusCode.ACCEPTED).json({
-      tournament,
+      status: "success",
+      data: {
+        tournament,
+        owner,
+      },
     });
   }
 );
@@ -71,7 +83,6 @@ export const getTournament = catchAsync(
 export const searchResults = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const searchQuery = req.query.search as string;
-    console.log(searchQuery);
     const tournaments = await prisma.tournament.findMany({
       where: {
         OR: [
@@ -122,14 +133,10 @@ export const getParticipants = catchAsync(
         user: true,
       },
     });
-    // delete participants.user.password;
-
-    const newParticipants = participants.forEach(
-      (participant: { user: Partial<User> }) => {
-        delete participant.user.password;
-        delete participant.user.Role;
-      }
-    );
+    participants.forEach((participant: { user: Partial<User> }) => {
+      delete participant.user.password;
+      delete participant.user.Role;
+    });
     res.status(HttpStatusCode.ACCEPTED).json({
       status: "success",
       participants,
