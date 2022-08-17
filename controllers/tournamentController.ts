@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 import catchAsync from "../utils/catchAsync";
 import HttpStatusCode from "../utils/constants/httpStatusCodes";
 const prisma = new PrismaClient();
@@ -122,6 +122,14 @@ export const getParticipants = catchAsync(
         user: true,
       },
     });
+    // delete participants.user.password;
+
+    const newParticipants = participants.forEach(
+      (participant: { user: Partial<User> }) => {
+        delete participant.user.password;
+        delete participant.user.Role;
+      }
+    );
     res.status(HttpStatusCode.ACCEPTED).json({
       status: "success",
       participants,
