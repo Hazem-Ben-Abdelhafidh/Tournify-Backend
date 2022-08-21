@@ -11,13 +11,15 @@ datasource db {
 }
 
 model User {
-  id         String       @id @unique @default(uuid())
-  name       String       @unique
-  email      String       @unique
-  password   String       @default("Hazem")
-  Role       Role         @default(USER)
-  Join       Join[]
-  Tournament Tournament[]
+  id           String         @id @unique @default(uuid())
+  name         String         @unique
+  email        String         @unique
+  password     String         @default("Hazem")
+  Role         Role           @default(USER)
+  Join         Join[]
+  Tournament   Tournament[]
+  Conversation Conversation[]
+  Message      Message[]
 }
 
 model Tournament {
@@ -40,6 +42,24 @@ model Join {
   user         User       @relation(fields: [userId], references: [id])
   tournamentId String
   tournament   Tournament @relation(fields: [tournamentId], references: [id])
+}
+
+model Conversation {
+  id       String    @id @unique @default(uuid())
+  userId   String
+  user     User      @relation(fields: [userId], references: [id])
+  messages Message[]
+}
+
+model Message {
+  id             String        @id @unique @default(uuid())
+  senderId       String
+  user           User          @relation(fields: [senderId], references: [id])
+  recieverId     String
+  text           String
+  createdAt      DateTime      @default(now())
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  conversationId String?
 }
 
 enum Role {
