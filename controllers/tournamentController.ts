@@ -34,7 +34,15 @@ export const updateTournament = catchAsync(
 
 export const deleteTournament = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const tournament = await prisma.tournament.delete({
+    const tournament = await prisma.tournament.findFirst({
+      where: { id: req.params.id },
+    });
+    // logged in user not the owner of the tournament
+    if (!(tournament?.ownerId === req.user?.id))
+      return next(new AppError("You are not the owner of this tournament!"));
+
+    // logged in user is the owner of the tournament
+    await prisma.tournament.delete({
       where: {
         id: req.params.id,
       },
