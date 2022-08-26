@@ -1,14 +1,17 @@
 import dotenv from "dotenv";
 dotenv.config();
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import cors from "cors";
+import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import router from "./routes/userRoutes";
 import tournamentRouter from "./routes/tournamentsRoutes";
 import AppError from "./utils/appError";
 import helmet from "helmet";
-import prisma from "./utils/prisma";
 import { google } from "googleapis";
+import messageRouter from "./routes/messageRoutes";
+import conversationRouter from "./routes/conversationRoutes";
+import { messageHandler } from "./controllers/messageController";
 process.on("uncaughtException", (err) => {
   console.log(err.name);
   console.log(err.message);
@@ -36,7 +39,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(helmet());
-app.listen(port, () => {
+const server = app.listen(port, () => {
   const auth = new google.auth.GoogleAuth({
     keyFile: process.env.KEY_FILE_PATH!,
     scopes,
@@ -48,5 +51,18 @@ app.listen(port, () => {
   console.log("Application listening on port: ", port);
 });
 
+export const io = new Server(server, {
+  cors: {
+    origin: "http://127.0.0.1:5173",
+    methods: ["GET", "POST", "DELETE", "PATCH", "PUT"],
+  },
+});
+
+io.on("connection", (socket) => {
+  messageHandler(io, socket);
+});
+
 app.use("/users", router);
 app.use("/tournaments", tournamentRouter);
+app.use("/messages", messageRouter);
+app.use("/conversations", conversationRouter);
