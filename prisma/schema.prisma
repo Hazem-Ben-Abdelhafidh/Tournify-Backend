@@ -45,10 +45,11 @@ model Join {
 }
 
 model Conversation {
-  id       String    @id @unique @default(uuid())
-  userId   String
-  user     User      @relation(fields: [userId], references: [id])
-  messages Message[]
+  id         String    @id @unique @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  messages   Message[]
+  recieverId String
 }
 
 model Message {
