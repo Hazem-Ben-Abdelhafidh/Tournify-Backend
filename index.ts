@@ -12,6 +12,7 @@ import { google } from "googleapis";
 import messageRouter from "./routes/messageRoutes";
 import conversationRouter from "./routes/conversationRoutes";
 import { messageHandler } from "./controllers/messageController";
+import redisClient from "./redis";
 process.on("uncaughtException", (err) => {
   console.log(err.name);
   console.log(err.message);
@@ -49,6 +50,7 @@ const server = app.listen(port, () => {
     auth,
   });
   console.log("Application listening on port: ", port);
+  redisClient();
 });
 
 export const io = new Server(server, {
