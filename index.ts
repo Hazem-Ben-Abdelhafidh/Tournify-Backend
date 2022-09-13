@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import router from "./routes/userRoutes";
 import tournamentRouter from "./routes/tournamentsRoutes";
-import AppError from "./utils/appError";
+import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { google } from "googleapis";
 import messageRouter from "./routes/messageRoutes";
@@ -52,6 +52,7 @@ const server = app.listen(port, () => {
   console.log("Application listening on port: ", port);
   redisClient();
 });
+app.use(cookieParser());
 
 export const io = new Server(server, {
   cors: {
@@ -63,7 +64,6 @@ export const io = new Server(server, {
 io.on("connection", (socket) => {
   messageHandler(io, socket);
 });
-
 app.use("/users", router);
 app.use("/tournaments", tournamentRouter);
 app.use("/messages", messageRouter);

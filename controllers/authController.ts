@@ -5,46 +5,31 @@ import AppError from "../utils/appError";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt/tokens";
 import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { promisify } from "util";
-import jwt, { Jwt, JwtPayload } from "jsonwebtoken";
-export const protect = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      return next(new AppError("You need to login first", 401));
-    }
-    const decoded: JwtPayload = await promisify(jwt.verify)(
-      token,
-      process.env.ACCESS_TOKEN_SECRET
-    );
-    const currentUser = await prisma.user.findUnique({
-      where: { id: decoded.id },
-    });
-    if (!currentUser) {
-      return next(
-        new AppError("the user belonging to this token no longer exists", 401)
-      );
-    }
-    req.user = currentUser;
+import HttpStatusCode from "../utils/constants/httpStatusCodes";
+import { client } from "../redis";
 
-    next();
-  }
-);
-// log User
-const logUser = (res: Response, user: User) => {
-  const accessToken = generateAccessToken(user);
-
-  res.status(200).json({
-    status: "success",
-    accessToken,
-    data: { user },
-  });
-};
 interface signupBody {
   name: string;
   email: string;
   password: string;
 }
+// log User
+const logUser = async (res: Response, user: User) => {
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+  res.cookie("jwt", refreshToken, {
+    httpOnly: true,
+    sameSite: "none",
+    expires: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+  });
+  await client.setEx(user.id, 259200, refreshToken);
+  res.status(HttpStatusCode.OK).json({
+    status: "success",
+    accessToken,
+    data: { user },
+  });
+};
+
 // signup
 export const signup = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {

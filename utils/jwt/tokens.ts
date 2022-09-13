@@ -16,7 +16,7 @@ export const generateRefreshToken = (user: User): string => {
     { id: user.id },
     process.env.REFRESH_TOKEN_SECRET!,
     {
-      expiresIn: "15m",
+      expiresIn: "3d",
     }
   );
   return refreshToken;

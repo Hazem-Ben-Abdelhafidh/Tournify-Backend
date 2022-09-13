@@ -9,9 +9,8 @@ export const getUser = catchAsync(
       where: {
         id: req.params.id,
       },
-      select: {
-        name: true,
-        id: true,
+      include: {
+        Conversation: true,
       },
     });
     res.status(HttpStatusCode.ACCEPTED).json({

@@ -1,8 +1,11 @@
 import express from "express";
-import { signup, login, protect } from "../controllers/authController";
+import { signup, login } from "../controllers/authController";
+import { refreshToken } from "../controllers/refreshTokenController";
 import { getUser } from "../controllers/userController";
+import { protect } from "../middlewares/protect";
 const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
 router.get("/getUser/:id", protect, getUser);
+router.get("/refreshToken", protect, refreshToken);
 export default router;

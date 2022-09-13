@@ -1,7 +1,7 @@
 import { createClient } from "redis";
+export const client = createClient();
 const redisClient = async () => {
   try {
-    const client = createClient();
     await client.connect();
     console.log("connected to redis");
   } catch (e) {
