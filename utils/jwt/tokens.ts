@@ -11,7 +11,7 @@ export const generateAccessToken = (user: User) => {
   );
   return accessToken;
 };
-export const generateRefreshToken = (user: User) => {
+export const generateRefreshToken = (user: User): string => {
   const refreshToken = jwt.sign(
     { id: user.id },
     process.env.REFRESH_TOKEN_SECRET!,

@@ -1,11 +1,11 @@
 import express from "express";
-import { protect } from "../controllers/authController";
 import { getMessages } from "../controllers/messageController";
+import { protect } from "../middlewares/protect";
 
 const messageRouter = express.Router();
 
 messageRouter.use(protect);
 
-messageRouter.get("/", getMessages);
+messageRouter.get("/:id", getMessages);
 
 export default messageRouter;

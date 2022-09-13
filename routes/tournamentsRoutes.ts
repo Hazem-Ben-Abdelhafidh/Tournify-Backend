@@ -1,5 +1,4 @@
 import express from "express";
-import { protect } from "../controllers/authController";
 import {
   createTournament,
   deleteTournament,
@@ -11,6 +10,7 @@ import {
   getParticipants,
   getTournamentsById,
 } from "../controllers/tournamentController";
+import { protect } from "../middlewares/protect";
 const tournamentRouter = express.Router();
 tournamentRouter.use(protect);
 tournamentRouter.route("/").get(getTournaments).post(createTournament);
