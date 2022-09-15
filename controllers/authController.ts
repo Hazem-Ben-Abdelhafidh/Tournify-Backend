@@ -15,14 +15,16 @@ interface signupBody {
 }
 // log User
 const logUser = async (res: Response, user: User) => {
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
+  const accessToken = generateAccessToken(user.id);
+  const refreshToken = generateRefreshToken(user.id);
+  await client.setEx(user.id, 259200, refreshToken);
+
   res.cookie("jwt", refreshToken, {
     httpOnly: true,
     sameSite: "none",
+    secure: false,
     expires: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
   });
-  await client.setEx(user.id, 259200, refreshToken);
   res.status(HttpStatusCode.OK).json({
     status: "success",
     accessToken,

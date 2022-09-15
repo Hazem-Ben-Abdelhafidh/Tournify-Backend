@@ -7,5 +7,5 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
 router.get("/getUser/:id", protect, getUser);
-router.get("/refreshToken", protect, refreshToken);
+router.get("/refreshToken", refreshToken);
 export default router;

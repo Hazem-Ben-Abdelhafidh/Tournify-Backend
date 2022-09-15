@@ -1,33 +1,55 @@
 import { NextFunction, Request, Response } from "express";
 
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
-import { promisify } from "util";
 import AppError from "../utils/appError";
 import catchAsync from "../utils/catchAsync";
+import HttpStatusCode from "../utils/constants/httpStatusCodes";
 import prisma from "../utils/prisma";
 
 // protect middleware
 export const protect = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      return next(new AppError("You need to login first", 401));
+    // 1) Getting token and check of it's there
+    let token;
+    const authHeader =
+      (req.headers.authorization as string) ||
+      (req.headers.Authorization as string);
+
+    if (authHeader && authHeader.startsWith("Bearer")) {
+      token = authHeader.split(" ")[1];
+    } else if (req.cookies.jwt) {
+      token = req.cookies.jwt;
     }
-    const decoded: JwtPayload = await promisify(jwt.verify)(
-      token,
-      process.env.ACCESS_TOKEN_SECRET
-    );
-    const currentUser = await prisma.user.findUnique({
-      where: { id: decoded.id },
-    });
-    if (!currentUser) {
+
+    if (!token) {
       return next(
-        new AppError("the user belonging to this token no longer exists", 401)
+        new AppError(
+          "You are not logged in! Please log in to get access.",
+          HttpStatusCode.UNAUTHORIZED
+        )
       );
     }
-    req.user = currentUser;
 
-    next();
+    // 2) Verification token
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
+      if (err) return next(new AppError("Nope", HttpStatusCode.FORBIDDEN));
+      // 3) Check if user still exists
+      const currentUser = await prisma.user.findUnique({
+        where: { id: decoded?.id },
+      });
+      if (!currentUser) {
+        return next(
+          new AppError(
+            "The user belonging to this token does no longer exist.",
+            HttpStatusCode.UNAUTHORIZED
+          )
+        );
+      }
+
+      // GRANT ACCESS TO PROTECTED ROUTE
+      req.user = currentUser;
+      next();
+    });
   }
 );
