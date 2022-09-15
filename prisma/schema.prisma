@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -11,15 +12,16 @@ datasource db {
 }
 
 model User {
-  id           String         @id @unique @default(uuid())
-  name         String         @unique
-  email        String         @unique
-  password     String         @default("Hazem")
-  Role         Role           @default(USER)
-  Join         Join[]
-  Tournament   Tournament[]
-  Conversation Conversation[]
-  Message      Message[]
+  id            String         @id @unique @default(uuid())
+  name          String         @unique
+  email         String         @unique
+  password      String         @default("Hazem")
+  Role          Role           @default(USER)
+  Join          Join[]
+  Tournament    Tournament[]
+  Conversation  Conversation[]
+  Message       Message[]
+  Notifications Notification[]
 }
 
 model Tournament {
@@ -45,11 +47,12 @@ model Join {
 }
 
 model Conversation {
-  id         String    @id @unique @default(uuid())
   userId     String
-  user       User      @relation(fields: [userId], references: [id])
+  user       User      @relation(fields: [recieverId], references: [id])
   messages   Message[]
   recieverId String
+
+  @@id([userId, recieverId])
 }
 
 model Message {
@@ -59,8 +62,14 @@ model Message {
   recieverId     String
   text           String
   createdAt      DateTime      @default(now())
-  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  conversation   Conversation? @relation(fields: [senderId, recieverId], references: [userId, recieverId])
   conversationId String?
+}
+
+model Notification {
+  id     String @id @unique @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 enum Role {
